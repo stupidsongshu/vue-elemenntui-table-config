@@ -1,0 +1,29 @@
+.table-ai-wrapper {
+  position: relative;
+}
+.btn-custom-column {
+  position: absolute;
+  /* bottom: 0;
+  right: 0; */
+  top: 0;
+  right: 0;
+  z-index: 9;
+}
+
+.drawer-wrapper {
+  overflow: auto;
+}
+.drawer-wrapper .el-drawer__header {
+  margin-bottom: 10px;
+  font-size: 18px;
+  font-weight: bold;
+}
+.drawer-wrapper .drawer__content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 20px;
+}
+.drawer__form {
+  flex: 1;
+}

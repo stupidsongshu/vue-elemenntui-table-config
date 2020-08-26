@@ -4,13 +4,27 @@ export default {
   functional: true,
   name: 'TableColumn',
   props: {
+    /**
+     * 数据结构
+     * {
+     *    attrs: {
+     *      label: string,
+     *      prop: string,
+     *      width?: number,
+     *      height?: number,
+     *      fixed?: boolean,
+     *      sortable?: boolean,
+     *    },
+     *    render()?: any,
+     * }
+     */
     columnData: {
       type: Object,
       required: true
     }
   },
   render (h, context) {
-    console.log(h, context)
+    // console.log(h, context)
     const { columnData } = context.props
     // console.log(columnData)
     return (

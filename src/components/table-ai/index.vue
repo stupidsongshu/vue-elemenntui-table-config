@@ -1,9 +1,10 @@
 <script>
 import TableColumn from './table-column'
 import Pagination from './Pagination'
+import './drawer.css'
 
 export default {
-  name: 'VueElementTable',
+  name: 'TableAi',
   components: { TableColumn, Pagination },
   props: {
     /**
@@ -13,8 +14,10 @@ export default {
       type: Object,
       default: () => ({
         name: '', // 表名，应保证全局唯一
+        pagination: true, // 是否需要显示分页
         currentPage: 1, // 分页，当前页
-        total: 0 // 分页，总条数
+        total: 0, // 分页，总条数
+        customColumns: true, // 是否需要开启自定义列
       })
     },
     /**
@@ -42,7 +45,7 @@ export default {
     return {
       selectedColumns: [],
       selectedColumnProps: [],
-      defineColumnVisible: false,
+      drawerVisible: false,
     }
   },
   computed: {
@@ -104,6 +107,12 @@ export default {
       }
     },
     handleCheckboxChange (val, prop) {
+      /**
+       * TODO 优化交互体验
+       * 点击勾选框时实时展示预览效果
+       * 点击确定按钮后更新数据
+       * 点击取消按钮会还原数据
+       */
       // console.log('handleCheckboxChange', val, prop)
       let selectedColumns = []
       if (val) {
@@ -124,59 +133,45 @@ export default {
       })
       this.updateColumns(selectedColumns)
     },
-    handleCloseDrawer (e) {
-      console.log('handleCloseDrawer', e, this.$refs.drawer.closeDrawer)
-      // this.$refs.drawer.closeDrawer()
-      this.defineColumnVisible = false
-    },
-    handleBeforeCloseDrawer (done) {
-      console.log('handleBeforeCloseDrawer', done)
-      done()
-    },
+    // handleCloseDrawer (e) {
+    //   this.drawerVisible = false
+    // },
   },
   render () {
     // console.log('render:', this.selectedColumns)
-
-    /**
-     * 
-      <el-table-column
-        key={column.id}
-        show-overflow-tooltip
-        {...{ attrs: { ...column.attrs, sortable: column.attrs.sortable, } }}
-        >
-        { column.render ? column.render : column.prop }
-      </el-table-column>
-     */
     return (
-      <div>
-        <el-button icon="el-icon-setting" on-click={() => this.defineColumnVisible = true}>字段选择</el-button>
+      <div class="table-ai-wrapper">
+        <el-button class="btn-custom-column" type="primary" circle size="mini" icon="el-icon-setting" on-click={() => this.drawerVisible = true}></el-button>
 
         <el-drawer
-          style={{'overflow': 'auto'}}
           ref="drawer"
-          visible={this.defineColumnVisible}
-          title="自定义字段"
-          with-header={false}
+          visible={this.drawerVisible}
+          title="自定义字段（选中顺序会决定展示顺序）"
+          with-header={true}
+          size="30%"
           direction="btt"
-          before-close={(e) => this.handleBeforeCloseDrawer(e)}>
-          <div style="padding: 20px;">
-            <h4>字段选择</h4>
-            <el-checkbox-group value={this.selectedColumnProps}>
-              {
-                this.checkboxColumns.map((column, index) => (
-                  <el-checkbox
-                    key={index}
-                    label={column.prop}
-                    disabled={column.prop === '__action'}
-                    on-change={(e) => this.handleCheckboxChange(e, column.prop)}>
-                    {column.label}
-                  </el-checkbox>
-                ))
-              }
-            </el-checkbox-group>
-
-            <el-button type="info" onClick={(e) => this.handleCloseDrawer(e)}>取消</el-button>
-            <el-button type="primary" onClick={() => this.$refs.drawer.closeDrawer()}>确定</el-button>
+          custom-class="drawer-wrapper"
+          wrapperClosable={false}
+          on-close={() => this.drawerVisible = false}>
+          <div class="drawer__content">
+            <div class="drawer__form">
+              <el-checkbox-group value={this.selectedColumnProps}>
+                {
+                  this.checkboxColumns.map((column, index) => (
+                    <el-checkbox
+                      key={index}
+                      label={column.prop}
+                      on-change={(e) => this.handleCheckboxChange(e, column.prop)}>
+                      {column.label}
+                    </el-checkbox>
+                  ))
+                }
+              </el-checkbox-group>
+            </div>
+            <div class="drawer__footer">
+              <el-button on-click={() => this.drawerVisible = false}>取 消</el-button>
+              <el-button type="primary" onClick={() => this.$refs.drawer.closeDrawer()}>确定</el-button>
+            </div>
           </div>
         </el-drawer>
 
@@ -187,6 +182,7 @@ export default {
             ))
           }
         </el-table>
+
         <pagination
           currentPage={this.table.currentPage}
           total={this.table.total}

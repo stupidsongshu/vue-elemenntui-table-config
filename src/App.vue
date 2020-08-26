@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <HelloWorld
+    <table-ai
       :table="table"
       :columns="columns"
       :data="data"
@@ -10,13 +10,11 @@
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
 // import Action from './components/action'
 
 export default {
   name: 'App',
   components: {
-    HelloWorld,
     // Action
   },
   data () {
@@ -52,16 +50,6 @@ export default {
         },
         {
           attrs: {
-            label: '生日',
-            prop: 'birth',
-            sortable: true,
-          },
-          render: (scope) => {
-            return scope.row.birth
-          }
-        },
-        {
-          attrs: {
             label: '性别',
             prop: 'sex',
             width: 80,
@@ -74,6 +62,16 @@ export default {
         },
         {
           attrs: {
+            label: '生日',
+            prop: 'birth',
+            sortable: true,
+          },
+          render: (scope) => {
+            return scope.row.birth
+          }
+        },
+        {
+          attrs: {
             label: '多级嵌套',
             prop: 'fen',
             children: [
@@ -82,14 +80,18 @@ export default {
                   label: '第一',
                   prop: 'fen-1',
                   children: [
-                    // {
-                    //   label: 'fen-1-1',
-                    //   prop: 'fen-1-1',
-                    // },
-                    // {
-                    //   label: 'fen-1-2',
-                    //   prop: 'fen-1-2',
-                    // }
+                    {
+                      attrs: {
+                        label: 'fen-1-1',
+                        prop: 'fen-1-1',
+                      },
+                    },
+                    {
+                      attrs: {
+                        label: 'fen-1-2',
+                        prop: 'fen-1-2',
+                      },
+                    }
                   ]
                 }
               },
