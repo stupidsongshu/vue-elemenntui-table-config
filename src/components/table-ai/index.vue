@@ -168,7 +168,7 @@ export default {
           on-reloadResult={(e) => this.$emit('reloadResult', e)}
         />
 
-        <el-button class="btn-custom-column" type="primary" circle size="mini" icon="el-icon-setting" on-click={() => this.drawerVisible = true}></el-button>
+        { this.table.customColumns && <el-button class="btn-custom-column" type="primary" circle size="mini" icon="el-icon-setting" on-click={() => this.drawerVisible = true}></el-button> }
 
         <el-drawer
           ref="drawer"

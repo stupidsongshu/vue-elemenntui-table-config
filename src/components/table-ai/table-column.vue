@@ -1,5 +1,10 @@
 <script>
-// https://juejin.im/post/6844904029542154248
+/**
+ * vue jsx el-table-column 递归嵌套
+ * https://juejin.im/post/6844903967361613832
+ * https://juejin.im/post/6844904029542154248
+ * https://juejin.im/post/6844903924252540941
+ */
 export default {
   functional: true,
   name: 'TableColumn',

@@ -22,7 +22,8 @@ export default {
       table: {
         name: 't_sts_gain',
         currentPage: 1,
-        total: 500
+        total: 500,
+        customColumns: true,
       },
       columns: Object.freeze([
         {
