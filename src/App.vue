@@ -55,7 +55,7 @@ export default {
             width: 80,
             sortable: true
           },
-          render: (scope) => {
+          _render: (scope) => {
             // console.log(scope, this)
             return scope.row.sex === 0 ? '女' : '男'
           }
@@ -66,7 +66,7 @@ export default {
             prop: 'birth',
             sortable: true,
           },
-          render: (scope) => {
+          _render: (scope) => {
             return scope.row.birth
           }
         },
@@ -85,12 +85,18 @@ export default {
                         label: 'fen-1-1',
                         prop: 'fen-1-1',
                       },
+                      _render: () => {
+                        return 'Hello'
+                      }
                     },
                     {
                       attrs: {
                         label: 'fen-1-2',
                         prop: 'fen-1-2',
                       },
+                      _render: () => {
+                        return 'World'
+                      }
                     }
                   ]
                 }
@@ -117,7 +123,7 @@ export default {
             prop: '__action',
             // fixed: 'right',
           },
-          render: (scope) => {
+          _render: (scope) => {
             return [
               <Action onClick={(e) => this.handleEdit(e)} />,
               <el-button type="danger" onClick={() => this.handleDelete(scope)}>删除</el-button>

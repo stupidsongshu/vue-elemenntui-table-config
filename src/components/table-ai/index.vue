@@ -46,6 +46,8 @@ export default {
       selectedColumns: [],
       selectedColumnProps: [],
       drawerVisible: false,
+      checkAll: false,
+      isIndeterminate: false,
     }
   },
   computed: {
@@ -58,19 +60,16 @@ export default {
   },
   methods: {
     initColumns () {
-      console.log(1)
       let selectedColumns = []
-      // 初始化
       if (this.table.name && this.columns && Array.isArray(this.columns) && this.columns.length) {
-        console.log(2)
         let cachedColumns = window.localStorage.getItem(this.table.name)
-        console.log(3, cachedColumns)
+        console.log(1, cachedColumns)
         try {
-          console.log(4)
+          console.log(2)
+          const columns = this.columns.filter(column => column.attrs)
           if (cachedColumns) {
-            console.log(5)
+            console.log(3)
             cachedColumns = JSON.parse(cachedColumns) || []
-            const columns = this.columns.filter(column => column.attrs)
             cachedColumns.forEach(cachedColumn => {
               for (const column of columns) {
                 if (column.attrs.prop === cachedColumn) {
@@ -79,42 +78,37 @@ export default {
                 }
               }
             })
-            console.log(6)
           } else {
-            console.log(7)
-            selectedColumns = this.columns
-            console.log(8)
+            selectedColumns = columns
+            console.log(4)
           }
         } catch (error) {
-          console.error('parse columns error', error)
+          console.error('parse columns error:', error)
         }
-      } else {
-        console.log(9)
-        selectedColumns = this.columns
       }
 
       this.updateColumns(selectedColumns)
     },
-    updateColumns (columns) {
-      console.log(columns)
-      if (this.table.name && columns && Array.isArray(columns) && columns.length) {
-        this.selectedColumns = columns
-        const handledColumns = columns.filter(column => column.attrs && column.attrs.prop).map(column => column.attrs.prop)
-        // 初始化 checkbox
-        this.selectedColumnProps = this.selectedColumns.filter(column => column.attrs).map(column => column.attrs.prop)
-        // 缓存
+    updateColumns (selectedColumns) {
+      console.log('updateselectedColumns:', this.table.name, selectedColumns)
+      if (this.table.name && selectedColumns && Array.isArray(selectedColumns)) {
+        this.selectedColumns = selectedColumns
+        // 更新 checkbox
+        this.selectedColumnProps = selectedColumns.filter(column => column.attrs).map(column => column.attrs.prop)
+        this.checkAll = this.selectedColumnProps.length === this.checkboxColumns.length
+        this.isIndeterminate = this.selectedColumnProps.length > 0 && this.selectedColumnProps.length < this.checkboxColumns.length
+        // 更新缓存
+        const handledColumns = selectedColumns.filter(column => column.attrs && column.attrs.prop).map(column => column.attrs.prop)
         window.localStorage.setItem(this.table.name, JSON.stringify(handledColumns))
       }
     },
+    handleCheckAllChange (val) {
+      // console.log('handleCheckAllChange:', val)
+      const selectedColumns = val ? this.columns.filter(column => column.attrs) : []
+      this.updateColumns(selectedColumns)
+    },
     handleCheckboxChange (val, prop) {
-      /**
-       * TODO 优化交互体验
-       * 点击勾选框时实时展示预览效果
-       * 点击确定按钮后更新数据
-       * 点击取消按钮会还原数据
-       */
       // console.log('handleCheckboxChange', val, prop)
-      let selectedColumns = []
       if (val) {
         this.selectedColumnProps.push(prop)
       } else {
@@ -124,6 +118,7 @@ export default {
         }
       }
 
+      const selectedColumns = []
       this.selectedColumnProps.forEach(prop => {
         for (const column of this.columns) {
           if (prop === column.attrs.prop) {
@@ -132,50 +127,34 @@ export default {
         }
       })
       this.updateColumns(selectedColumns)
+
+      // this.doLayout()
     },
-    // handleCloseDrawer (e) {
+    // doLayout () {
+    //   this.$nextTick(() => {
+    //     this.$refs.tableRef.doLayout()
+    //   })
+    // },
+    /** TODO 优化：
+     * 点击勾选框时实时展示预览效果
+     * 点击确定按钮后更新数据
+     * 点击取消按钮会还原数据
+     */
+    // handleDrawerCancel () {
     //   this.drawerVisible = false
+    //   // TODO reset
+    // },
+    // handleDrawerConfirm () {
+    //   // this.$refs.drawer.closeDrawer()
+    //   this.drawerVisible = false
+    //   // this.updateColumns(this.selectedColumns)
     // },
   },
   render () {
     // console.log('render:', this.selectedColumns)
     return (
       <div class="table-ai-wrapper">
-        <el-button class="btn-custom-column" type="primary" circle size="mini" icon="el-icon-setting" on-click={() => this.drawerVisible = true}></el-button>
-
-        <el-drawer
-          ref="drawer"
-          visible={this.drawerVisible}
-          title="自定义字段（选中顺序会决定展示顺序）"
-          with-header={true}
-          size="30%"
-          direction="btt"
-          custom-class="drawer-wrapper"
-          wrapperClosable={false}
-          on-close={() => this.drawerVisible = false}>
-          <div class="drawer__content">
-            <div class="drawer__form">
-              <el-checkbox-group value={this.selectedColumnProps}>
-                {
-                  this.checkboxColumns.map((column, index) => (
-                    <el-checkbox
-                      key={index}
-                      label={column.prop}
-                      on-change={(e) => this.handleCheckboxChange(e, column.prop)}>
-                      {column.label}
-                    </el-checkbox>
-                  ))
-                }
-              </el-checkbox-group>
-            </div>
-            <div class="drawer__footer">
-              <el-button on-click={() => this.drawerVisible = false}>取 消</el-button>
-              <el-button type="primary" onClick={() => this.$refs.drawer.closeDrawer()}>确定</el-button>
-            </div>
-          </div>
-        </el-drawer>
-
-        <el-table data={this.data} fit border stripe highlight-current-row>
+        <el-table ref="tableRef" data={this.data} fit border stripe highlight-current-row>
           {
             this.selectedColumns.map((column) => (
               <table-column column-data={column}></table-column>
@@ -188,6 +167,47 @@ export default {
           total={this.table.total}
           on-reloadResult={(e) => this.$emit('reloadResult', e)}
         />
+
+        <el-button class="btn-custom-column" type="primary" circle size="mini" icon="el-icon-setting" on-click={() => this.drawerVisible = true}></el-button>
+
+        <el-drawer
+          ref="drawer"
+          visible={this.drawerVisible}
+          title="自定义字段（选中顺序会影响展示顺序，切换全选可重置顺序）"
+          with-header={true}
+          modal={true}
+          size="25%"
+          direction="btt"
+          custom-class="drawer-wrapper"
+          wrapperClosable={false}
+          on-close={() => this.drawerVisible = false}>
+          <div class="drawer__content">
+            <div class="drawer__form">
+              <el-checkbox
+                indeterminate={this.isIndeterminate}
+                v-model={this.checkAll}
+                on-change={this.handleCheckAllChange}>
+                全选
+              </el-checkbox>
+              <el-checkbox-group value={this.selectedColumnProps}>
+                {
+                  this.checkboxColumns.map((column) => (
+                    <el-checkbox
+                      key={column.prop}
+                      label={column.prop}
+                      on-change={(e) => this.handleCheckboxChange(e, column.prop)}>
+                      {column.label}
+                    </el-checkbox>
+                  ))
+                }
+              </el-checkbox-group>
+            </div>
+            {/*<div class="drawer__footer">
+              <el-button on-click={this.handleDrawerCancel}>取 消</el-button>
+              <el-button type="primary" onClick={this.handleDrawerConfirm}>确 定</el-button>
+            </div>*/}
+          </div>
+        </el-drawer>
       </div>
     )
   }

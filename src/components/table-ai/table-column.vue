@@ -28,13 +28,13 @@ export default {
     const { columnData } = context.props
     // console.log(columnData)
     return (
-      <el-table-column {...{ attrs: columnData.attrs }}>
+      <el-table-column {...{ attrs: columnData.attrs }} key={columnData.attrs.prop}>
         {
           (columnData.attrs.children && columnData.attrs.children.length > 0)
           ?
           columnData.attrs.children.map((item) => (<table-column column-data={item}></table-column>))
           :
-          columnData.render ? columnData.render : columnData.attrs.prop
+          columnData._render ? columnData._render : columnData.attrs.prop
         }
       </el-table-column>
     )
